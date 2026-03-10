@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lexi Perez-Ferrari</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Mono:wght@300;400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --cream: #F5F0E8;
+      --warm-white: #FDFBF7;
+      --ink: #1A1208;
+      --forest: #2D4A2D;
+      --moss: #5C7A45;
+      --gold: #C8952A;
+      --gold-light: #E8BC5A;
+      --blush: #D4816A;
+      --blush-light: #E8B4A4;
+      --paper: #EDE5D4;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background-color: var(--cream);
+      color: var(--ink);
+      font-family: 'DM Mono', monospace;
+      overflow-x: hidden;
+      cursor: none;
+    }
+
+    /* Custom cursor */
+    .cursor {
+      width: 12px; height: 12px;
+      background: var(--gold);
+      border-radius: 50%;
+      position: fixed;
+      pointer-events: none;
+      z-index: 9999;
+      transform: translate(-50%, -50%);
+      transition: transform 0.1s ease, width 0.2s, height 0.2s, background 0.2s;
+      mix-blend-mode: multiply;
+    }
+    .cursor-ring {
+      width: 36px; height: 36px;
+      border: 1.5px solid var(--gold);
+      border-radius: 50%;
+      position: fixed;
+      pointer-events: none;
+      z-index: 9998;
+      transform: translate(-50%, -50%);
+      transition: transform 0.15s ease, width 0.2s, height 0.2s;
+    }
+    body:hover .cursor { opacity: 1; }
+
+    /* Noise texture overlay */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 100;
+      opacity: 0.4;
+    }
+
+    /* NAV */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0;
+      z-index: 200;
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 20px 48px;
+      background: rgba(245, 240, 232, 0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(200, 149, 42, 0.2);
+    }
+    .nav-logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.1rem;
+      letter-spacing: 0.05em;
+      color: var(--ink);
+      text-decoration: none;
+    }
+    .nav-links { display: flex; gap: 32px; list-style: none; }
+    .nav-links a {
+      font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase;
+      color: var(--ink); text-decoration: none; opacity: 0.6;
+      transition: opacity 0.2s, color 0.2s;
+    }
+    .nav-links a:hover { opacity: 1; color: var(--gold); }
+
+    /* HERO */
+    .hero {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      align-items: center;
+      padding: 120px 48px 80px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Decorative background circle */
+    .hero::after {
+      content: '';
+      position: absolute;
+      right: -120px; top: 50%;
+      transform: translateY(-50%);
+      width: 600px; height: 600px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(200,149,42,0.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero-text { position: relative; z-index: 1; }
+
+    .hero-eyebrow {
+      font-size: 0.65rem; letter-spacing: 0.25em; text-transform: uppercase;
+      color: var(--moss); margin-bottom: 24px;
+      display: flex; align-items: center; gap: 12px;
+      opacity: 0; animation: fadeUp 0.8s 0.2s forwards;
+    }
+    .hero-eyebrow::before {
+      content: ''; display: block;
+      width: 32px; height: 1px; background: var(--moss);
+    }
+
+    h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(3.2rem, 6vw, 5.5rem);
+      line-height: 1.05;
+      font-weight: 700;
+      margin-bottom: 8px;
+      opacity: 0; animation: fadeUp 0.9s 0.35s forwards;
+    }
+    h1 em {
+      font-style: italic;
+      color: var(--blush);
+    }
+
+    .hero-subtitle {
+      font-family: 'Instrument Serif', serif;
+      font-style: italic;
+      font-size: 1.3rem;
+      color: var(--forest);
+      margin-bottom: 36px;
+      opacity: 0; animation: fadeUp 0.9s 0.5s forwards;
+    }
+
+    .hero-desc {
+      font-size: 0.78rem; line-height: 1.9;
+      color: rgba(26,18,8,0.65);
+      max-width: 420px;
+      margin-bottom: 44px;
+      opacity: 0; animation: fadeUp 0.9s 0.65s forwards;
+    }
+
+    .hero-ctas {
+      display: flex; gap: 16px; flex-wrap: wrap;
+      opacity: 0; animation: fadeUp 0.9s 0.8s forwards;
+    }
+
+    .btn-primary {
+      padding: 14px 28px;
+      background: var(--forest);
+      color: var(--cream);
+      font-family: 'DM Mono', monospace;
+      font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase;
+      border: none; border-radius: 2px;
+      text-decoration: none;
+      transition: background 0.25s, transform 0.15s;
+      display: inline-block;
+    }
+    .btn-primary:hover { background: var(--ink); transform: translateY(-2px); }
+
+    .btn-outline {
+      padding: 14px 28px;
+      background: transparent;
+      color: var(--forest);
+      font-family: 'DM Mono', monospace;
+      font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase;
+      border: 1px solid var(--forest);
+      border-radius: 2px;
+      text-decoration: none;
+      transition: background 0.25s, color 0.25s, transform 0.15s;
+      display: inline-block;
+    }
+    .btn-outline:hover { background: var(--forest); color: var(--cream); transform: translateY(-2px); }
+
+    /* Hero Right - Fun Stats Card Stack */
+    .hero-right {
+      display: flex; justify-content: center; align-items: center;
+      position: relative;
+      opacity: 0; animation: fadeIn 1.1s 0.6s forwards;
+    }
+
+    .card-stack { position: relative; width: 320px; height: 400px; }
+
+    .stat-card {
+      position: absolute;
+      background: var(--warm-white);
+      border: 1px solid rgba(200,149,42,0.25);
+      border-radius: 8px;
+      padding: 24px 28px;
+      box-shadow: 0 4px 24px rgba(26,18,8,0.06);
+    }
+
+    .card-1 {
+      width: 260px;
+      top: 0; left: 20px;
+      transform: rotate(-3.5deg);
+      z-index: 1;
+      background: var(--paper);
+      animation: float1 5s ease-in-out infinite;
+    }
+    .card-2 {
+      width: 260px;
+      top: 90px; left: 40px;
+      transform: rotate(1.5deg);
+      z-index: 2;
+      background: var(--warm-white);
+      animation: float2 6s ease-in-out infinite;
+    }
+    .card-3 {
+      width: 260px;
+      top: 185px; left: 10px;
+      transform: rotate(-1deg);
+      z-index: 3;
+      background: var(--cream);
+      animation: float3 5.5s ease-in-out infinite;
+    }
+
+    @keyframes float1 {
+      0%,100% { transform: rotate(-3.5deg) translateY(0); }
+      50% { transform: rotate(-3.5deg) translateY(-6px); }
+    }
+    @keyframes float2 {
+      0%,100% { transform: rotate(1.5deg) translateY(0); }
+      50% { transform: rotate(1.5deg) translateY(-8px); }
+    }
+    @keyframes float3 {
+      0%,100% { transform: rotate(-1deg) translateY(0); }
+      50% { transform: rotate(-1deg) translateY(-5px); }
+    }
+
+    .card-label {
+      font-size: 0.58rem; letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--gold); margin-bottom: 6px;
+    }
+    .card-value {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.4rem; color: var(--ink);
+      line-height: 1.2;
+    }
+    .card-sub {
+      font-size: 0.65rem; color: rgba(26,18,8,0.45);
+      margin-top: 4px;
+    }
+
+    /* SECTION BASE */
+    section {
+      padding: 100px 48px;
+    }
+    .section-label {
+      font-size: 0.6rem; letter-spacing: 0.3em; text-transform: uppercase;
+      color: var(--gold); margin-bottom: 16px;
+      display: flex; align-items: center; gap: 12px;
+    }
+    .section-label::after {
+      content: ''; flex: 1; max-width: 48px;
+      height: 1px; background: var(--gold);
+    }
+    h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2rem, 4vw, 3rem);
+      margin-bottom: 48px;
+      line-height: 1.15;
+    }
+
+    /* EXPERIENCE */
+    .experience-section { background: var(--warm-white); }
+    .exp-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px;
+    }
+    .exp-card {
+      background: var(--cream);
+      border: 1px solid rgba(200,149,42,0.18);
+      border-radius: 6px;
+      padding: 32px;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    .exp-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 40px rgba(26,18,8,0.1);
+    }
+    .exp-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+    }
+    .exp-card.vistra::before { background: linear-gradient(90deg, var(--forest), var(--moss)); }
+    .exp-card.parkway::before { background: linear-gradient(90deg, var(--gold), var(--gold-light)); }
+    .exp-card.megatrax::before { background: linear-gradient(90deg, var(--blush), var(--blush-light)); }
+
+    .exp-company {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.3rem; margin-bottom: 4px;
+    }
+    .exp-role {
+      font-size: 0.65rem; letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--moss); margin-bottom: 4px;
+    }
+    .exp-date {
+      font-size: 0.62rem; color: rgba(26,18,8,0.4);
+      margin-bottom: 20px;
+    }
+    .exp-bullets {
+      list-style: none;
+    }
+    .exp-bullets li {
+      font-size: 0.72rem; line-height: 1.8;
+      color: rgba(26,18,8,0.65);
+      padding-left: 14px;
+      position: relative;
+    }
+    .exp-bullets li::before {
+      content: '→';
+      position: absolute; left: 0;
+      color: var(--gold); font-size: 0.65rem;
+    }
+
+    /* SKILLS */
+    .skills-section { background: var(--cream); }
+    .skills-container { max-width: 900px; }
+
+    .skill-group { margin-bottom: 36px; }
+    .skill-group-name {
+      font-size: 0.6rem; letter-spacing: 0.2em; text-transform: uppercase;
+      color: rgba(26,18,8,0.4); margin-bottom: 16px;
+    }
+    .skill-tags { display: flex; flex-wrap: wrap; gap: 10px; }
+
+    .skill-tag {
+      padding: 8px 18px;
+      border: 1px solid;
+      border-radius: 100px;
+      font-size: 0.68rem; letter-spacing: 0.08em;
+      transition: background 0.25s, color 0.25s, transform 0.2s;
+      cursor: default;
+    }
+    .skill-tag:hover { transform: scale(1.05); }
+    .skill-tag.tech {
+      border-color: var(--forest); color: var(--forest);
+    }
+    .skill-tag.tech:hover { background: var(--forest); color: var(--cream); }
+    .skill-tag.soft {
+      border-color: var(--blush); color: var(--blush);
+    }
+    .skill-tag.soft:hover { background: var(--blush); color: var(--cream); }
+    .skill-tag.domain {
+      border-color: var(--gold); color: var(--gold);
+    }
+    .skill-tag.domain:hover { background: var(--gold); color: var(--cream); }
+
+    /* ABOUT / FUN FACTS */
+    .about-section {
+      background: var(--forest);
+      color: var(--cream);
+    }
+    .about-section .section-label { color: var(--gold-light); }
+    .about-section .section-label::after { background: var(--gold-light); }
+    .about-section h2 { color: var(--cream); }
+
+    .facts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+    }
+    .fact-item {
+      padding: 28px 24px;
+      border: 1px solid rgba(245,240,232,0.15);
+      border-radius: 6px;
+      transition: background 0.3s, transform 0.2s;
+    }
+    .fact-item:hover {
+      background: rgba(245,240,232,0.07);
+      transform: translateY(-3px);
+    }
+    .fact-icon { font-size: 1.6rem; margin-bottom: 12px; }
+    .fact-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1rem; margin-bottom: 6px;
+      color: var(--gold-light);
+    }
+    .fact-desc {
+      font-size: 0.65rem; line-height: 1.8;
+      color: rgba(245,240,232,0.6);
+    }
+
+    /* EDUCATION */
+    .education-section { background: var(--paper); }
+    .edu-card {
+      display: flex; gap: 48px; align-items: flex-start;
+      flex-wrap: wrap;
+    }
+    .edu-main { flex: 2; min-width: 280px; }
+    .edu-school {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.8rem; margin-bottom: 6px;
+    }
+    .edu-degree {
+      font-size: 0.72rem; letter-spacing: 0.08em;
+      color: var(--forest); margin-bottom: 6px;
+    }
+    .edu-date { font-size: 0.65rem; color: rgba(26,18,8,0.4); margin-bottom: 24px; }
+    .coursework-grid {
+      display: flex; flex-wrap: wrap; gap: 8px;
+    }
+    .course-chip {
+      padding: 5px 14px;
+      background: rgba(45,74,45,0.08);
+      border-radius: 100px;
+      font-size: 0.62rem; letter-spacing: 0.06em;
+      color: var(--forest);
+    }
+
+    .edu-side { flex: 1; min-width: 200px; }
+    .honor-item {
+      padding: 16px 0;
+      border-bottom: 1px solid rgba(200,149,42,0.2);
+    }
+    .honor-item:last-child { border-bottom: none; }
+    .honor-name {
+      font-family: 'Instrument Serif', serif;
+      font-size: 0.95rem; margin-bottom: 3px;
+    }
+    .honor-detail { font-size: 0.62rem; color: rgba(26,18,8,0.45); }
+
+    /* CONTACT */
+    .contact-section {
+      background: var(--ink);
+      color: var(--cream);
+      text-align: center;
+    }
+    .contact-section .section-label {
+      justify-content: center;
+      color: var(--gold-light);
+    }
+    .contact-section .section-label::after,
+    .contact-section .section-label::before { display: none; }
+    .contact-section h2 { color: var(--cream); text-align: center; }
+
+    .contact-tagline {
+      font-family: 'Instrument Serif', serif;
+      font-style: italic;
+      font-size: 1.1rem;
+      color: rgba(245,240,232,0.5);
+      margin-bottom: 48px;
+      margin-top: -24px;
+    }
+    .contact-links {
+      display: flex; justify-content: center;
+      gap: 20px; flex-wrap: wrap;
+      margin-bottom: 64px;
+    }
+    .contact-link {
+      padding: 14px 28px;
+      border: 1px solid rgba(245,240,232,0.25);
+      border-radius: 2px;
+      color: var(--cream); text-decoration: none;
+      font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase;
+      transition: background 0.25s, border-color 0.25s, transform 0.15s;
+    }
+    .contact-link:hover {
+      background: rgba(245,240,232,0.08);
+      border-color: var(--gold-light);
+      transform: translateY(-2px);
+    }
+
+    .footer-note {
+      font-size: 0.58rem; letter-spacing: 0.15em; text-transform: uppercase;
+      color: rgba(245,240,232,0.2);
+    }
+
+    /* ANIMATIONS */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    /* Scroll reveal */
+    .reveal {
+      opacity: 0; transform: translateY(28px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+    .reveal-delay-1 { transition-delay: 0.1s; }
+    .reveal-delay-2 { transition-delay: 0.2s; }
+    .reveal-delay-3 { transition-delay: 0.3s; }
+
+    /* Divider */
+    .section-divider {
+      width: 100%; height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(200,149,42,0.3), transparent);
+    }
+
+    @media (max-width: 768px) {
+      nav { padding: 16px 24px; }
+      .hero { grid-template-columns: 1fr; padding: 100px 24px 60px; }
+      .hero-right { display: none; }
+      section { padding: 72px 24px; }
+      .edu-card { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursor-ring"></div>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">Lexi Perez-Ferrari</a>
+  <ul class="nav-links">
+    <li><a href="#experience">Experience</a></li>
+    <li><a href="#skills">Skills</a></li>
+    <li><a href="#about">About</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="hero">
+  <div class="hero-text">
+    <div class="hero-eyebrow">Available May 2026</div>
+    <h1>Lexi<br><em>Perez-Ferrari</em></h1>
+    <p class="hero-subtitle">Information Systems · Business Analytics</p>
+    <p class="hero-desc">
+      Senior at the University of Arkansas turning data into decisions. I bring a mix of analytical rigor, hands-on tech skills, and a knack for making complex systems work better — whether that's optimizing energy operations or building recommendation engines from scratch.
+    </p>
+    <div class="hero-ctas">
+      <a href="#experience" class="btn-primary">View My Work</a>
+      <a href="#contact" class="btn-outline">Get In Touch</a>
+    </div>
+  </div>
+
+  <div class="hero-right">
+    <div class="card-stack">
+      <div class="stat-card card-1">
+        <div class="card-label">Graduating</div>
+        <div class="card-value">May 2026</div>
+        <div class="card-sub">University of Arkansas</div>
+      </div>
+      <div class="stat-card card-2">
+        <div class="card-label">Experience</div>
+        <div class="card-value">3 Internships</div>
+        <div class="card-sub">Energy · HR · Research</div>
+      </div>
+      <div class="stat-card card-3">
+        <div class="card-label">Hidden Talent</div>
+        <div class="card-value">Eagle Scout 🦅</div>
+        <div class="card-sub">+ Roller Derby Team Captain</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- EXPERIENCE -->
+<section class="experience-section" id="experience">
+  <div class="section-label">Professional Experience</div>
+  <h2 class="reveal">Where I've Made<br><em style="font-family: 'Instrument Serif', serif; font-style: italic;">an Impact</em></h2>
+  <div class="exp-grid">
+
+    <div class="exp-card vistra reveal reveal-delay-1">
+      <div class="exp-company">Vistra Energy</div>
+      <div class="exp-role">Performance Excellence Intern</div>
+      <div class="exp-date">Irving, TX · Summer 2025</div>
+      <ul class="exp-bullets">
+        <li>Worked within the Performance Excellence Operations department at a leading integrated power company</li>
+        <li>Leveraged Microsoft CoPilot to streamline and document business processes</li>
+        <li>Gained deep exposure to energy operations workflows and organizational efficiency</li>
+        <li>Returning as a new hire in May 2026</li>
+      </ul>
+    </div>
+
+    <div class="exp-card parkway reveal reveal-delay-2">
+      <div class="exp-company">Parkway Construction</div>
+      <div class="exp-role">HR Intern</div>
+      <div class="exp-date">Lewisville, TX · Summers 2023 & 2024</div>
+      <ul class="exp-bullets">
+        <li>Supported HR operations across two consecutive summers — trusted enough to return</li>
+        <li>Managed new hire onboarding end-to-end, ensuring smooth employee transitions</li>
+        <li>Handled sensitive personnel filing and accurate data entry at scale</li>
+      </ul>
+    </div>
+
+    <div class="exp-card megatrax reveal reveal-delay-3">
+      <div class="exp-company">Megatrax</div>
+      <div class="exp-role">Research & Data Intern</div>
+      <div class="exp-date">Denton, TX · Summer 2020</div>
+      <ul class="exp-bullets">
+        <li>Conducted targeted LinkedIn research to identify and qualify business contacts</li>
+        <li>Built and maintained a structured contact database from raw research findings</li>
+        <li>Developed early instincts for data quality and organized record-keeping</li>
+      </ul>
+    </div>
+
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- SKILLS -->
+<section class="skills-section" id="skills">
+  <div class="section-label">Toolkit</div>
+  <h2 class="reveal">What I<br><em style="font-family:'Instrument Serif',serif;font-style:italic;">Work With</em></h2>
+
+  <div class="skills-container">
+    <div class="skill-group reveal">
+      <div class="skill-group-name">Technical Tools</div>
+      <div class="skill-tags">
+        <span class="skill-tag tech">Tableau</span>
+        <span class="skill-tag tech">SQL</span>
+        <span class="skill-tag tech">SAS Viya</span>
+        <span class="skill-tag tech">C#</span>
+        <span class="skill-tag tech">Microsoft Excel</span>
+        <span class="skill-tag tech">CoPilot</span>
+        <span class="skill-tag tech">SQL Server</span>
+        <span class="skill-tag tech">Git / VS Code</span>
+      </div>
+    </div>
+    <div class="skill-group reveal reveal-delay-1">
+      <div class="skill-group-name">Domain Knowledge</div>
+      <div class="skill-tags">
+        <span class="skill-tag domain">Business Analytics</span>
+        <span class="skill-tag domain">Data Visualization</span>
+        <span class="skill-tag domain">Logistic Regression</span>
+        <span class="skill-tag domain">ERP Systems</span>
+        <span class="skill-tag domain">Supply Chain</span>
+        <span class="skill-tag domain">Process Optimization</span>
+        <span class="skill-tag domain">HR Operations</span>
+      </div>
+    </div>
+    <div class="skill-group reveal reveal-delay-2">
+      <div class="skill-group-name">Strengths</div>
+      <div class="skill-tags">
+        <span class="skill-tag soft">Detail-Oriented</span>
+        <span class="skill-tag soft">Team Leadership</span>
+        <span class="skill-tag soft">Cross-functional Communication</span>
+        <span class="skill-tag soft">Problem Solver</span>
+        <span class="skill-tag soft">Fast Learner</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ABOUT / FUN FACTS -->
+<section class="about-section" id="about">
+  <div class="section-label">Beyond the Resume</div>
+  <h2 class="reveal">A Few Things That<br><em style="font-family:'Instrument Serif',serif;font-style:italic;">Make Me, Me</em></h2>
+
+  <div class="facts-grid">
+    <div class="fact-item reveal reveal-delay-1">
+      <div class="fact-icon">🦅</div>
+      <div class="fact-title">Eagle Scout</div>
+      <div class="fact-desc">Earned in 2022 — one of the highest ranks in Scouts BSA. Built on years of leadership, service, and learning to prepare for anything.</div>
+    </div>
+    <div class="fact-item reveal reveal-delay-2">
+      <div class="fact-icon">🛼</div>
+      <div class="fact-title">Team Captain</div>
+      <div class="fact-desc">Led Rolling Rebellion Roller Derby from 2018–2020. Strategy, teamwork, and a high tolerance for chaos — skills that translate surprisingly well to project work.</div>
+    </div>
+    <div class="fact-item reveal reveal-delay-3">
+      <div class="fact-icon">🏛️</div>
+      <div class="fact-title">Honor Society</div>
+      <div class="fact-desc">Member of the National Society of Leadership & Success at the University of Arkansas, recognized for academic achievement and campus engagement.</div>
+    </div>
+    <div class="fact-item reveal reveal-delay-1">
+      <div class="fact-icon">🌸</div>
+      <div class="fact-title">Delta Gamma</div>
+      <div class="fact-desc">Active on the Wellness & Engagement Committee — because great work culture and community go hand in hand.</div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- EDUCATION -->
+<section class="education-section" id="education">
+  <div class="section-label">Education</div>
+  <h2 class="reveal">University of <em style="font-family:'Instrument Serif',serif;font-style:italic;">Arkansas</em></h2>
+
+  <div class="edu-card">
+    <div class="edu-main reveal">
+      <div class="edu-school">Sam M. Walton<br>College of Business</div>
+      <div class="edu-degree">B.S. Business Administration — Information Systems, Business Analytics Concentration</div>
+      <div class="edu-date">Fayetteville, AR · Expected May 2026</div>
+      <div class="coursework-grid">
+        <span class="course-chip">Data Analysis</span>
+        <span class="course-chip">Business Analytics</span>
+        <span class="course-chip">Information Systems I & II</span>
+        <span class="course-chip">Supply Chain Management</span>
+        <span class="course-chip">Strategic Management</span>
+        <span class="course-chip">ERP Fundamentals</span>
+        <span class="course-chip">Finance & Accounting</span>
+        <span class="course-chip">Human Resources Mgmt</span>
+        <span class="course-chip">Marketing</span>
+      </div>
+    </div>
+
+    <div class="edu-side reveal reveal-delay-2">
+      <div class="honor-item">
+        <div class="honor-name">National Society of Leadership & Success</div>
+        <div class="honor-detail">Honor Society Chapter · 2024</div>
+      </div>
+      <div class="honor-item">
+        <div class="honor-name">Delta Gamma</div>
+        <div class="honor-detail">Wellness & Engagement Committee</div>
+      </div>
+      <div class="honor-item">
+        <div class="honor-name">Eagles Scout</div>
+        <div class="honor-detail">Scouts BSA · Earned 2022</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- CONTACT -->
+<section class="contact-section" id="contact">
+  <div class="section-label">Let's Connect</div>
+  <h2 class="reveal">Ready to<br><em style="font-family:'Instrument Serif',serif;font-style:italic;">Talk?</em></h2>
+  <p class="contact-tagline reveal">I'm always open to new opportunities and conversations.</p>
+
+  <div class="contact-links reveal">
+    <a href="mailto:Lperezferrari@gmail.com" class="contact-link">✉ Email Me</a>
+    <a href="http://www.linkedin.com/in/lexi-perez-ferrari-74941b362" target="_blank" class="contact-link">in LinkedIn</a>
+    <a href="tel:+19729717412" class="contact-link">☎ (972) 971-7412</a>
+  </div>
+
+  <p class="footer-note reveal">Based in Fayetteville, AR · Available May 2026 · Lexi Perez-Ferrari</p>
+</section>
+
+<script>
+  // Custom cursor
+  const cursor = document.getElementById('cursor');
+  const ring = document.getElementById('cursor-ring');
+  document.addEventListener('mousemove', e => {
+    cursor.style.left = e.clientX + 'px';
+    cursor.style.top = e.clientY + 'px';
+    setTimeout(() => {
+      ring.style.left = e.clientX + 'px';
+      ring.style.top = e.clientY + 'px';
+    }, 60);
+  });
+  document.querySelectorAll('a, button, .skill-tag, .exp-card, .fact-item').forEach(el => {
+    el.addEventListener('mouseenter', () => {
+      cursor.style.width = '20px'; cursor.style.height = '20px';
+      cursor.style.background = 'var(--blush)';
+      ring.style.width = '50px'; ring.style.height = '50px';
+    });
+    el.addEventListener('mouseleave', () => {
+      cursor.style.width = '12px'; cursor.style.height = '12px';
+      cursor.style.background = 'var(--gold)';
+      ring.style.width = '36px'; ring.style.height = '36px';
+    });
+  });
+
+  // Scroll reveal
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) { e.target.classList.add('visible'); }
+    });
+  }, { threshold: 0.12 });
+  reveals.forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
